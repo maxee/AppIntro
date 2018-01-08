@@ -13,6 +13,7 @@ public final class AppIntroViewPager extends ViewPager {
     private boolean pagingEnabled;
     private boolean nextPagingEnabled;
     private float currentTouchDownX;
+    private float currentTouchDownY;
     private long illegallyRequestedNextPageLastCalled;
     private int lockPage;
     private ScrollerCustomDuration mScroller = null;
@@ -58,6 +59,7 @@ public final class AppIntroViewPager extends ViewPager {
     public boolean onInterceptTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             currentTouchDownX = event.getX();
+            currentTouchDownY = event.getY();
             return super.onInterceptTouchEvent(event);
         } else if (checkPagingState(event) || checkCanRequestNextPage(event)) {
             // Call callback method if threshold has been reached
@@ -72,6 +74,7 @@ public final class AppIntroViewPager extends ViewPager {
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             currentTouchDownX = event.getX();
+            currentTouchDownY = event.getY();
             return super.onTouchEvent(event);
         }
         // Check if we should handle the touch event
@@ -92,6 +95,7 @@ public final class AppIntroViewPager extends ViewPager {
         if (!nextPagingEnabled) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 currentTouchDownX = event.getX();
+                currentTouchDownY = event.getY();
             }
             if (event.getAction() == MotionEvent.ACTION_MOVE) {
                 if (detectSwipeToRight(event)) {
@@ -108,10 +112,11 @@ public final class AppIntroViewPager extends ViewPager {
     }
 
     private void checkIllegallyRequestedNextPage(MotionEvent event) {
-        int swipeThreshold = 25;
+        int swipeThresholdX = 25;
+        int swipeMaxY = 25;
 
         if (event.getAction() == MotionEvent.ACTION_MOVE &&
-                Math.abs(event.getX() - currentTouchDownX) >= swipeThreshold) {
+                Math.abs(event.getX() - currentTouchDownX) >= swipeThresholdX && Math.abs(event.getY() - currentTouchDownY) <= swipeMaxY) {
             if (System.currentTimeMillis() - illegallyRequestedNextPageLastCalled >=
                     ON_ILLEGALLY_REQUESTED_NEXT_PAGE_MAX_INTERVAL) {
                 illegallyRequestedNextPageLastCalled = System.currentTimeMillis();
